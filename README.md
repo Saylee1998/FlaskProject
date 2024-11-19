@@ -38,5 +38,6 @@ Users can follow other runners to view their workout history.
 
 ### Run the project:
 Step1 :  pip install -r requirements.txt
+
 Step2 : python app.py
 
