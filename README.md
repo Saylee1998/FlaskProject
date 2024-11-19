@@ -19,7 +19,8 @@ Users can follow other runners to view their workout history.
 
 
 ### APIs:
-1.**RegisterUser:** To add a new user by name
+1.**RegisterUser:** To add a new user by name.
+
 
 2.**GetUser:** To retrieve a user's information by ID
 
@@ -34,3 +35,8 @@ Users can follow other runners to view their workout history.
 7.**FollowFriend:** Allows users to follow other runners
 
 8.**ShowFriendWorkouts:** Allow users to view the workouts of the runners they follow
+
+### Run the project:
+Step1 :  pip install -r requirements.txt
+Step2 : python app.py
+
