@@ -15,16 +15,21 @@ class RegisterUser(Resource):
             "id": user_id,
             "name": name,
             "age": age,
-            "workouts": []
+            "workouts": [],
+            "following": set()
         }
-        return users[user_id], 200
+        user_data = users[user_id].copy()
+        user_data["following"] = list(user_data["following"])
+        return user_data, 200
     
 class GetUser(Resource):
     def get(self, user_id):  
         user = users.get(user_id)
         if user is None:
             return {"message": "User not found"}, 404
-        return user, 200
+        user_data = user.copy()
+        user_data["following"] = list(user_data["following"])
+        return user_data, 200
 
 
 class RemoveUser(Resource):
@@ -37,7 +42,12 @@ class RemoveUser(Resource):
 
 class ListUsers(Resource):
     def get(self):
-        return {"users": list(users.values())}, 200
+        users_list = []
+        for user in users.values():
+            user_copy = user.copy()
+            user_copy["following"] = list(user_copy["following"])
+            users_list.append(user_copy)
+        return {"users": users_list}, 200
     
 
 
@@ -72,3 +82,35 @@ class ListWorkouts(Resource):
             return {"message": "User not found"}, 404
 
         return {"workouts": user["workouts"]}, 200
+    
+
+
+follow_friend_parser = reqparse.RequestParser()
+follow_friend_parser.add_argument(
+    "follow_id", type=str, required=True, help="follow_id is required"
+)
+
+class FollowFriend(Resource):
+    def put(self, user_id):
+        args = follow_friend_parser.parse_args()
+        follow_id = args["follow_id"]
+        
+        if user_id not in users or follow_id not in users:
+            return {"message": "User not found"}, 404
+
+        users[user_id]["following"].add(follow_id)
+
+        return {"following": list(users[user_id]["following"])}, 200
+
+class ShowFriendWorkouts(Resource):
+    def get(self, user_id, follow_id):
+        
+        if user_id not in users or follow_id not in users:
+            return {"message": "User not found"}, 404
+
+        
+        if follow_id not in users[user_id]["following"]:
+            return {"message": "You are not following this user"}, 403
+
+        
+        return {"workouts": users[follow_id]["workouts"]}, 200        
