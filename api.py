@@ -2,6 +2,8 @@ from flask_restful import Resource, reqparse
 from uuid import uuid4 as generateId  
 
 users = {}
+workouts={}
+following={}
 
 register_user_parser = (reqparse.RequestParser()
     .add_argument("name", type=str, required=True,help="Name is required")
@@ -10,26 +12,24 @@ register_user_parser = (reqparse.RequestParser()
 class RegisterUser(Resource):
     def post(self):
         name, age = register_user_parser.parse_args().values()
-        user_id = str(generateId())
+        user_id = str(generateId()) 
         users[user_id] = {
             "id": user_id,
             "name": name,
             "age": age,
-            "workouts": [],
-            "following": set()
+            
         }
-        user_data = users[user_id].copy()
-        user_data["following"] = list(user_data["following"])
-        return user_data, 200
+        workouts[user_id] = []
+        following[user_id] = set()
+        return users[user_id], 200  
+
     
 class GetUser(Resource):
     def get(self, user_id):  
         user = users.get(user_id)
         if user is None:
             return {"message": "User not found"}, 404
-        user_data = user.copy()
-        user_data["following"] = list(user_data["following"])
-        return user_data, 200
+        return user, 200
 
 
 class RemoveUser(Resource):
@@ -42,12 +42,9 @@ class RemoveUser(Resource):
 
 class ListUsers(Resource):
     def get(self):
-        users_list = []
-        for user in users.values():
-            user_copy = user.copy()
-            user_copy["following"] = list(user_copy["following"])
-            users_list.append(user_copy)
-        return {"users": users_list}, 200
+        return {"users": [user for user in users.values()]}, 200
+        
+
     
 
 
@@ -68,10 +65,11 @@ class AddWorkout(Resource):
 
         workout = {
             "date": args["date"],
-            "time": args["time"],
             "distance": args["distance"],
+            "time": args["time"]
+            
         }
-        user["workouts"].append(workout)
+        workouts[user_id].append(workout)
         return workout, 200
 
 
@@ -81,7 +79,7 @@ class ListWorkouts(Resource):
         if user is None:
             return {"message": "User not found"}, 404
 
-        return {"workouts": user["workouts"]}, 200
+        return {"workouts": workouts[user_id]}, 200
     
 
 
@@ -98,9 +96,8 @@ class FollowFriend(Resource):
         if user_id not in users or follow_id not in users:
             return {"message": "User not found"}, 404
 
-        users[user_id]["following"].add(follow_id)
-
-        return {"following": list(users[user_id]["following"])}, 200
+        following[user_id].add(follow_id)
+        return {"following": list(following[user_id])}, 200
 
 class ShowFriendWorkouts(Resource):
     def get(self, user_id, follow_id):
@@ -109,8 +106,8 @@ class ShowFriendWorkouts(Resource):
             return {"message": "User not found"}, 404
 
         
-        if follow_id not in users[user_id]["following"]:
+        if follow_id not in following[user_id]:
             return {"message": "You are not following this user"}, 403
 
         
-        return {"workouts": users[follow_id]["workouts"]}, 200        
+        return {"workouts": workouts[follow_id]}, 200        
