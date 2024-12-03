@@ -41,3 +41,6 @@ Step1 :  pip install -r requirements.txt
 
 Step2 : python app.py
 
+### Bugs and issues faced:
+
+
