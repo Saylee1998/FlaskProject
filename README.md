@@ -42,5 +42,5 @@ Step1 :  pip install -r requirements.txt
 Step2 : python app.py
 
 ### Bugs and issues faced:
-
+The initial implementation of the workouts object as a local variable within the RegisterUser method limited its scope. By transforming it into a global dictionary and initializing an empty list for each new user, the system now maintains workout data across different API interactions.
 
